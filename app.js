@@ -1,3 +1,4 @@
+const bodyParser = require('body-parser');
 const express = require('express');
 const http = require('http');
 const morgan = require('morgan');
@@ -8,6 +9,8 @@ const app = express();
 
 
 app.use(morgan('dev'));
+app.use(bodyParser.urlencoded());
+
 
 app.get('/',(req, res) => {
     res.send('Hello World!');
