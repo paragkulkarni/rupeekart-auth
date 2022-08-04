@@ -1,0 +1,14 @@
+{
+  "name": "rupeekart-auth",
+  "version": "1.0.0",
+  "description": "Authentication for rupeekart user",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Parag Kulkarni",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.1"
+  }
+}
