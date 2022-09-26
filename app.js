@@ -4,6 +4,11 @@ const http = require('http');
 const logger = require('morgan');
 const cors = require('cors');
 var cookieParser = require('cookie-parser');
+const sessions = require('express-session');
+const filestore = require("session-file-store")(sessions);
+const oneDay = 600000;   //millsecond for 10 min
+const uuid = require('uuid').v4; // generating random string
+
 require("dotenv").config();
 
 
@@ -30,6 +35,21 @@ app.use(cors({
 }));
 app.use(cookieParser());
 
+// session create
+app.use(sessions({
+    genid: (req)=>{
+        return uuid() //use uuid for sessionid
+    },
+    secret: process.env.SECRET,
+    saveUninitialized: true,
+    cookie: { 
+        maxAge: oneDay, 
+        secure: false,    // this is for production use https access only
+        httpOnly: true   // true: means no access from javascript
+    },
+    resave: false,
+    store: new filestore() 
+}));
 
 
 
@@ -38,7 +58,7 @@ app.use('/users', userRouter);
 
 
 app.get('/',(req, res) => {
-    res.send('Hello World!');
+    return res.send('Hello World! Session end!!<h1><a href="http://localhost:3000/users/login">Login</a></h1>');
 });
 
 

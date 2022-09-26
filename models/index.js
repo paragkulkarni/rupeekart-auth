@@ -57,8 +57,6 @@ db.Sequelize = Sequelize;
 
 db.user = require("./User")(sequelize, DataTypes);
 
-console.log('db ----- '+ db)
-
 
 db.sequelize.sync({force: false})
   .then(() => {
