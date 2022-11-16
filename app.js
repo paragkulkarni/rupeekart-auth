@@ -6,7 +6,7 @@ const cors = require('cors');
 var cookieParser = require('cookie-parser');
 const sessions = require('express-session');
 const filestore = require("session-file-store")(sessions);
-const oneDay = 600000;   //millsecond for 10 min
+const expiresInMilliSec = 60000;   //millsecond for 10 min
 const uuid = require('uuid').v4; // generating random string
 
 require("dotenv").config();
@@ -17,6 +17,7 @@ require("dotenv").config();
 
 // Router
 const userRouter = require('./routers/users.router');
+const path = require('path');
 
 
 
@@ -41,14 +42,18 @@ app.use(sessions({
         return uuid() //use uuid for sessionid
     },
     secret: process.env.SECRET,
-    saveUninitialized: true,
-    cookie: { 
-        maxAge: oneDay, 
-        secure: false,    // this is for production use https access only
-        httpOnly: true   // true: means no access from javascript
-    },
     resave: false,
-    store: new filestore() 
+    saveUninitialized: true,
+    cookie: {
+        maxAge: expiresInMilliSec
+    },
+    store : new filestore(
+        {
+            path: './session',
+            reapInterval: expiresInMilliSec
+        }
+    ),
+    expires:  Date.now() + expiresInMilliSec
 }));
 
 

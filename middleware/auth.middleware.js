@@ -1,14 +1,14 @@
-const isAuthMiddleware = (req, res, next)=>{
-    console.log("1:isAuthMiddleware",req.session)
-    if(req.session.isAuth==true){
-        next();
-    } else {
-        console.log("2:isAuthMiddleware",req.session)
+const jwt = require('jsonwebtoken');
+require("dotenv").config();
 
-        res.redirect('/users/login');
+
+const isAuthMiddleware = (req, res, next)=>{ 
+    if(!req.session){
+        res.status(400).send("User session end");
     }
-    console.log("3:isAuthMiddleware")
-    
+   
+    if(!req.cookies.access_token) res.status(400).send("Access denied. Token failed.");
+    next();   
 };
 
 

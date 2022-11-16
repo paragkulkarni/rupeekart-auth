@@ -5,7 +5,10 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const isAuthMiddleware = require('../middleware/auth.middleware');
 const User = db.user;
+const axios = require('axios');
 
+
+require("dotenv").config();
 
 // Get users listing
 router.get('/', function(req, res, next){
@@ -52,28 +55,18 @@ router.post('/login', async(req, res, next)=>{
     if(!user){
         return res.redirect('/');
     };
-    req.isAuth = true;
     let password_valid = await bcrypt.compare(req.body.password, user.dataValues.password);
     if(password_valid){
         const token = jwt.sign({
                                 "id": user.dataValues.id,
                                 "email": user.dataValues.email,
                                 "first_name": user.dataValues.first_name
-                            }, process.env.SECRET);
-        // res.status(200).json({token: token});
-        // res.cookie("access_token", token, { httpOnly: true }).redirect('/users/me');
-        return res.status(200).send({
-            success: 'ok',
-            token: token,
-            userinfo: {
-                "id": user.dataValues.id,
-                "email": user.dataValues.email,
-                "first_name": user.dataValues.first_name
-            }
-        });
+                            }, process.env.SECRET,{expiresIn:'10m'});
+        req.session.token = token;
+        return res.cookie("access_token", token, { httpOnly: true }).redirect('/users/me');         
     } else {
-        return res.status(400).json({
-            error: "Password INcorrect"
+        return res.status(200).send({
+            error: "Password Incorrect"
         });
     }
 });
@@ -81,39 +74,30 @@ router.post('/login', async(req, res, next)=>{
 
 router.get('/me', isAuthMiddleware,
     async(req,res,next)=>{
-        if(!req.session && !req.cookies.access_token){
-            return res.status(404).json({'msg':"User not found"});
-        }
-        next();
-        // let user = await User.findOne({where:{id : req.session.user.id},attributes:{exclude:["password"]}});
-        //   return res.status(200).json({'user': user,'session': req.session});
-    },
-    async(req,res,next)=>{
+        const session = req.session;
         try {
-            let token = req.cookies.access_token;
-            let decoded = jwt.verify(token,process.env.SECRET);
-            if(decoded){
-                return res.send("This is homepage");
-            };    
+            if(!session&!session.token){
+                return res.redirect('users/login')
+            } else {
+                const decoded = jwt.verify(session.token,process.env.SECRET);
+                return res.status(200).json({
+                    'success': true,
+                    'user' : decoded
+                });   
+            }
         } catch(err){
-            return res.status(401).json({"msg":"Couldn't Authenticate Homepage"});
+            return res.status(400).send("Couldn't Authenticate Homepage");
         }
     }
 ); 
 
 
 router.get('/logout', isAuthMiddleware ,async (req, res, next)=>{
-
-    let token = req.cookies.access_token;
-    if(!token){
-        return res.send("Token is not valid.");
-    }
-    let decoded = jwt.verify(token,process.env.SECRET);
-    if(!decoded){
-        return res.send("Token is not valid.");
-    };
-    req.session.destroy();
-    return res.clearCookie("access_token").redirect('/users/login');
+    req.session.destroy((err) => {
+        console.log("error after session destroy - ", err)
+        res.status(200).redirect('/users/login'); // this will always fire after session is destroyed
+    });
+    
 });
 
 
