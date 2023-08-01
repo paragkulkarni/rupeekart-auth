@@ -31,7 +31,7 @@ app.use(cors({
     // origin: 'http://www.rupeekart-tst.com'
     // origin: ['http://www.rupeekart-tst.com', 'https://google.com']
     // methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH']
-    origin: '*'
+    origin: '*',
 }));
 app.use(cookieParser());
 

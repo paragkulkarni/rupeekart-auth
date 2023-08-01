@@ -1,8 +1,8 @@
 {
   "development": {
     "username": "postgres",
-    "password": null,
-    "database": "rupee-auth-db",
+    "password": "admin",
+    "database": "rupee_auth_db",
     "host": "127.0.0.1",
     "dialect": "postgres",
     "pool":{

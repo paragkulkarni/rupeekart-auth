@@ -38,17 +38,43 @@ router.post('/register', async (req, res, next)=>{
             const created_user = await User.create(user);
             console.log(created_user.toJSON())
           // save user token
-            res.status(201).json({"success":1, "data": created_user.toJSON()});
+            res.status(201).json({"success":true, "data": created_user.toJSON()});
         });       
     });
     
 });
 
 
-router.post('/login', async(req, res, next)=>{
+router.post('/token', async(req, res, next)=>{
+    console.log(req.body)
     const user =await User.findOne({where: {
         email: req.body.email
     }});
+
+    console.log("123",user)
+    if(user){
+        // return res.redirect('/');
+        const token = jwt.sign({
+            "id": user.dataValues.id,
+            "email": user.dataValues.email,
+            "first_name": user.dataValues.first_name
+        }, process.env.SECRET);
+        return res.status(200).json({token: token});
+        // res.cookie("Access_token", token, { httpOnly: true }).redirect('/users/me');
+        
+    } else {
+        return res.status(400).json({
+            error: "Email not found"
+        });
+    }
+});
+
+router.post('/login', async (req, res, next)=>{
+    console.log(req.body)
+    const user = await User.findOne({where: {
+        email: req.body.email
+    }});
+    console.log()
     if(!user){
         return res.redirect('/');
     };
@@ -61,9 +87,9 @@ router.post('/login', async(req, res, next)=>{
                                 "first_name": user.dataValues.first_name
                             }, process.env.SECRET);
         // res.status(200).json({token: token});
-        // res.cookie("access_token", token, { httpOnly: true }).redirect('/users/me');
+        // res.cookie("Access_token", token, { httpOnly: true }).redirect('/users/me');
         return res.status(200).send({
-            success: 'ok',
+            success: true,
             token: token,
             userinfo: {
                 "id": user.dataValues.id,
@@ -73,7 +99,7 @@ router.post('/login', async(req, res, next)=>{
         });
     } else {
         return res.status(400).json({
-            error: "Password INcorrect"
+            error: "Password Incorrect"
         });
     }
 });
@@ -81,7 +107,7 @@ router.post('/login', async(req, res, next)=>{
 
 router.get('/me', isAuthMiddleware,
     async(req,res,next)=>{
-        if(!req.session && !req.cookies.access_token){
+        if(!req.session && !req.headers.authorization){
             return res.status(404).json({'msg':"User not found"});
         }
         next();
@@ -90,7 +116,7 @@ router.get('/me', isAuthMiddleware,
     },
     async(req,res,next)=>{
         try {
-            let token = req.cookies.access_token;
+            let token = req.headers.authorization.split(' ')[1];
             let decoded = jwt.verify(token,process.env.SECRET);
             if(decoded){
                 return res.send("This is homepage");
@@ -104,7 +130,7 @@ router.get('/me', isAuthMiddleware,
 
 router.get('/logout', isAuthMiddleware ,async (req, res, next)=>{
 
-    let token = req.cookies.access_token;
+    let token = req.cookies.Access_token;
     if(!token){
         return res.send("Token is not valid.");
     }
@@ -113,7 +139,7 @@ router.get('/logout', isAuthMiddleware ,async (req, res, next)=>{
         return res.send("Token is not valid.");
     };
     req.session.destroy();
-    return res.clearCookie("access_token").redirect('/users/login');
+    return res.clearCookie("Access_token").redirect('/users/login');
 });
 
 
