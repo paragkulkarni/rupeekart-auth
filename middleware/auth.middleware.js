@@ -1,14 +1,22 @@
-const isAuthMiddleware = (req, res, next)=>{
-    console.log("1:isAuthMiddleware",req.session)
-    if(req.session.isAuth==true){
-        next();
-    } else {
-        console.log("2:isAuthMiddleware",req.session)
+const jwt = require('jsonwebtoken');
 
-        res.redirect('/users/login');
+
+const isAuthMiddleware = (req, res, next)=>{
+    const authHeader = req.headers.authorization;
+    if(authHeader){
+        jwt.verify(authHeader, process.env.SECRET, (err, user) => {
+            if (err) {
+                res.writeHead( 400, 'Current password does not match', {'content-type' : 'text/plain'});
+                res.end( 'Current value does not match');
+                return;
+            }
+            req.user = user;
+            next();
+        });
+    } else {
+        return res.sendStatus(404);
     }
-    console.log("3:isAuthMiddleware")
-    
+    next();
 };
 
 

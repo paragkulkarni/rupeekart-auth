@@ -49,6 +49,7 @@ router.post('/login', async(req, res, next)=>{
     const user =await User.findOne({where: {
         email: req.body.email
     }});
+    console.log("Print user login data -- ",user)
     if(!user){
         return res.redirect('/');
     };
@@ -79,25 +80,12 @@ router.post('/login', async(req, res, next)=>{
 });
 
 
-router.get('/me', isAuthMiddleware,
-    async(req,res,next)=>{
-        if(!req.session && !req.cookies.access_token){
+router.get('/me', isAuthMiddleware,(req,res,next) => {
+        if(!req.session){
             return res.status(404).json({'msg':"User not found"});
         }
-        next();
-        // let user = await User.findOne({where:{id : req.session.user.id},attributes:{exclude:["password"]}});
-        //   return res.status(200).json({'user': user,'session': req.session});
-    },
-    async(req,res,next)=>{
-        try {
-            let token = req.cookies.access_token;
-            let decoded = jwt.verify(token,process.env.SECRET);
-            if(decoded){
-                return res.send("This is homepage");
-            };    
-        } catch(err){
-            return res.status(401).json({"msg":"Couldn't Authenticate Homepage"});
-        }
+        console.log(req.user)
+        return res.send(`Hi ${req.user.first_name},This is homepage`);
     }
 ); 
 

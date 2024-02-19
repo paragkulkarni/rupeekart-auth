@@ -6,7 +6,7 @@ const cors = require('cors');
 var cookieParser = require('cookie-parser');
 const sessions = require('express-session');
 const filestore = require("session-file-store")(sessions);
-const oneDay = 600000;   //millsecond for 10 min
+const oneDay = (24 * 60 * 60 * 1000);   // hrs * min * sec * one thousands millisecond
 const uuid = require('uuid').v4; // generating random string
 
 require("dotenv").config();
@@ -16,7 +16,7 @@ require("dotenv").config();
 
 
 // Router
-const userRouter = require('./routers/users.router');
+const userRouter = require("./routers/users.router");
 
 
 
@@ -53,7 +53,7 @@ app.use(sessions({
 
 
 
-app.use('/users', userRouter);
+app.use('/com', userRouter);
 
 
 
