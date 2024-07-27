@@ -1,9 +1,10 @@
 {
   "development": {
     "username": "postgres",
-    "password": "table",
+    "password": "postgres",
     "database": "rupee-auth-db",
     "host": "127.0.0.1",
+    "port": "5433",
     "dialect": "postgres",
     "pool":{
       "max": 4,

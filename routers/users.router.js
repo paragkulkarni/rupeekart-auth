@@ -35,10 +35,13 @@ router.post('/register', async (req, res, next)=>{
                 email: req.body.email,
                 password: hash
             };
-            const created_user = await User.create(user);
-            console.log(created_user.toJSON())
+            await User.create(user).then((result) => {
+                res.status(201).json({"success":1, "data": result.toJSON()});
+            }).catch((err) => {
+                res.status(400).json({"failed":1,"error": err}).end();
+            });
+
           // save user token
-            res.status(201).json({"success":1, "data": created_user.toJSON()});
         });       
     });
     
